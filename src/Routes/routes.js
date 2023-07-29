@@ -1,7 +1,7 @@
 const express = require("express")
 
 const {createUsers, userLogin} = require("../Controllers/userController")
-const {createCars,soldcarCreate} = require("../Controllers/soldcarController")
+const {createCars,soldcarCreate} = require("../Controllers/carController")
 
 const router = express.Router()
 
