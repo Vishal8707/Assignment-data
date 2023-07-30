@@ -10,7 +10,7 @@ const createCars = async function (req, res) {
     const bicycle =faker.vehicle.bicycle();
     const model=faker.vehicle.model();
 
-    const vehicles_info = {
+    const car_info = {
       color: faker.vehicle.color(),
       fuel: faker.vehicle.fuel(),
       manufacturer: faker.vehicle.manufacturer(),
@@ -23,7 +23,7 @@ const createCars = async function (req, res) {
       type,
       bicycle,
       model,
-      vehicles_info,
+      car_info,
     };
 
     const db = getDatabase();
@@ -44,14 +44,13 @@ const createCars = async function (req, res) {
 };
 
 
-
-
-
-
 const soldcarCreate = async function (req, res) {
   try {
+    const car_id = req.body.car_id;
     const vehicles_id = uuidv4();
-    const car_id = uuidv4();
+  
+    // const checkSoldcars = await soldVehicles.find({car_id:car_id})
+    // if(checkSoldcars) return res.status(400).send({status:false, msg:"This car_id is already present"})
 
     const vehicles_info = {
       color: faker.vehicle.color(),
@@ -68,7 +67,7 @@ const soldcarCreate = async function (req, res) {
     };
 
     const db = getDatabase();
-    const collection = db.collection("Sold_vehicles");
+    const collection = db.collection("soldVehicles");
 
     // Define the email as the primary key
     collection.createIndex({ vehicles_id: 1 }, { unique: true });

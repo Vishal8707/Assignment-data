@@ -1,18 +1,19 @@
 const { getDatabase } = require("../db");
 const jwt = require("jsonwebtoken");
 const faker = require("faker");
+const { v4: uuidv4 } = require("uuid");
+const bcrypt = require("bcrypt");
 const {
+  validateVehicleId,
   validateEmail,
   validatePassword,
 } = require("../validation/validator");
 
 const createUsers = async function (req, res) {
   try {
-    const firstName = faker.name.firstName();
-    const lastName = faker.name.lastName();
     const email = faker.internet.email();
+    const user_id = uuidv4();
 
-    const password = faker.internet.password();
     const country = faker.address.country();
 
     const user_info = {
@@ -20,19 +21,37 @@ const createUsers = async function (req, res) {
       state: faker.address.state(),
       zipCode: faker.address.zipCode(),
     };
+    const password = faker.internet.password();
+    const hash = bcrypt.hashSync(password, 10);
 
-    const data = {
-      firstName,
-      lastName,
-      email,
-      country,
-      user_info,
-      password
-    };
+    const vehicles_id = req.body.vehicles_id;
+    if (!validateVehicleId(vehicles_id))
+    return res
+    .status(400)
+    .send({ status: false, msg: "Please Enter valid vehicle ID." });
+    if (!vehicles_id || vehicles_id === "")
+    return res
+    .status(400)
+    .send({ status: false, msg: "Vehicle ID is mandatory." });
 
     const db = getDatabase();
+    const vehiclesModel = db.collection("soldVehicles");
+    const checkvehicles_id = await vehiclesModel.find({ vehicles_id: 1 }).toArray();
+    if(!checkvehicles_id)return res.status(400).send({status:false, msg:"Please enter valid vehicle_Id."})
+    const data = {
+      email,
+      user_id,
+      country,
+      user_info,
+      password: hash,
+      vehicles_info: vehicles_id,
+    };
+
+ 
     const collection = db.collection("users");
 
+    const checkvehicles = await collection.find({ vehicles_id: 1 }).toArray();
+    if(checkvehicles) return res.status(400).send({status:false, msg:"This vehicle ID is already registered."})
     // Define the email as the primary key
     collection.createIndex({ email: 1 }, { unique: true });
 
@@ -58,9 +77,7 @@ const userLogin = async function (req, res) {
         .send({ status: false, msg: "Please fill all the details" });
 
     if (!email || email == "")
-      return res
-        .status(400)
-        .send({ status: false, msg: "email is mandatory" });
+      return res.status(400).send({ status: false, msg: "email is mandatory" });
 
     if (!password || password == "")
       return res
@@ -92,13 +109,11 @@ const userLogin = async function (req, res) {
 
     res.setHeader("x-api-key", token);
 
-    return res
-      .status(200)
-      .send({
-        status: true,
-        message: "User login successfull",
-        data: { userId: verifyUser["_id"], token },
-      });
+    return res.status(200).send({
+      status: true,
+      message: "User login successfull",
+      data: { userId: verifyUser["_id"], token },
+    });
   } catch (err) {
     return res.status(500).send({ status: false, msg: err.msg });
   }

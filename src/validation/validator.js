@@ -1,8 +1,8 @@
 //======================================= Name Regex Validation ========================================//
 
 
-const validateName = (name) => {
-    return (/^(?=.{1,50}$)[a-z]+(?:['_.\s][a-z]+)*$/i.test(name))
+const validateVehicleId = (name) => {
+    return (/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(name))
   }
   
   
@@ -23,4 +23,4 @@ const validateName = (name) => {
   }
   
 
-  module.exports = { validateName, validateEmail, validatePassword }
+  module.exports = { validateVehicleId, validateEmail, validatePassword }
