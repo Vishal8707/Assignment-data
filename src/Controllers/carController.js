@@ -2,13 +2,12 @@ const { getDatabase } = require("../db");
 const { v4: uuidv4 } = require("uuid");
 const faker = require("faker");
 
-
 const createCars = async function (req, res) {
   try {
     const car_id = uuidv4();
     const type = faker.vehicle.type();
-    const bicycle =faker.vehicle.bicycle();
-    const model=faker.vehicle.model();
+    const bicycle = faker.vehicle.bicycle();
+    const model = faker.vehicle.model();
 
     const car_info = {
       color: faker.vehicle.color(),
@@ -43,14 +42,17 @@ const createCars = async function (req, res) {
   }
 };
 
-
 const soldcarCreate = async function (req, res) {
+  
   try {
+    const db = getDatabase();
+    const soldVehicles = db.collection("soldVehicles");
     const car_id = req.body.car_id;
     const vehicles_id = uuidv4();
-  
-    // const checkSoldcars = await soldVehicles.find({car_id:car_id})
-    // if(checkSoldcars) return res.status(400).send({status:false, msg:"This car_id is already present"})
+
+    const checkSoldcars = await soldVehicles.findOne({car_id:car_id})
+    console.log(checkSoldcars)
+    if(checkSoldcars) return res.status(400).send({status:false, msg:"This car_id is already present"})
 
     const vehicles_info = {
       color: faker.vehicle.color(),
@@ -66,14 +68,11 @@ const soldcarCreate = async function (req, res) {
       vehicles_info,
     };
 
-    const db = getDatabase();
-    const collection = db.collection("soldVehicles");
-
     // Define the email as the primary key
-    collection.createIndex({ vehicles_id: 1 }, { unique: true });
+    soldVehicles.createIndex({ vehicles_id: 1 }, { unique: true });
 
     // Perform the 'insertOne' operation to save the data in the 'users' collection
-    const saveData = await collection.insertOne(data);
+    const saveData = await soldVehicles.insertOne(data);
 
     return res
       .status(201)
@@ -83,4 +82,4 @@ const soldcarCreate = async function (req, res) {
   }
 };
 
-module.exports = { soldcarCreate, createCars};
+module.exports = { soldcarCreate, createCars };
