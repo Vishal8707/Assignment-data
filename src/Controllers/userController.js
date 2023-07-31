@@ -110,4 +110,31 @@ const userLogin = async function (req, res) {
   }
 };
 
-module.exports = { createUsers, userLogin };
+
+
+
+const getAllCars = async function (req, res) {
+  try {
+    email = req.body.email
+
+    const data = {
+      email,
+    };
+    const db = getDatabase();
+    const collection = db.collection("cars");
+
+    const allCar = await collection.find().toArray()
+    
+    return res
+      .status(201)
+      .send({ status: true, msg: "successfully get all cars", data: allCar });
+  } catch (err) {
+    return res.status(500).send({ status: false, msg: err.message });
+  }
+};
+
+
+
+
+
+module.exports = { createUsers, userLogin , getAllCars};
