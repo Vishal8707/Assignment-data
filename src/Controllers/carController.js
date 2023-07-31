@@ -51,8 +51,8 @@ const soldcarCreate = async function (req, res) {
     const vehicles_id = uuidv4();
 
     const checkSoldcars = await soldVehicles.findOne({car_id:car_id})
-    console.log(checkSoldcars)
-    if(checkSoldcars) return res.status(400).send({status:false, msg:"This car_id is already present"})
+    
+    if(checkSoldcars) return res.status(400).send({status:false, msg:"This car had already been sold."})
 
     const vehicles_info = {
       color: faker.vehicle.color(),

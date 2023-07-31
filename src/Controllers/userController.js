@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const faker = require("faker");
 const { v4: uuidv4 } = require("uuid");
 const bcrypt = require("bcrypt");
+const mongodb = require("mongodb");
 const { validateVehicleId, validateEmail } = require("../validation/validator");
 
 const createUsers = async function (req, res) {
@@ -21,20 +22,22 @@ const createUsers = async function (req, res) {
     const hash = bcrypt.hashSync(password, 10);
 
     const vehicles_id = req.body.vehicles_id;
-    if (!validateVehicleId(vehicles_id))
-      return res
-        .status(400)
-        .send({ status: false, msg: "Please Enter valid vehicle ID." });
+
     if (!vehicles_id || vehicles_id === "")
       return res
         .status(400)
         .send({ status: false, msg: "Vehicle ID is mandatory." });
+    if (!validateVehicleId(vehicles_id))
+      return res
+        .status(400)
+        .send({ status: false, msg: "Please Enter valid vehicle ID." });
 
     const db = getDatabase();
     const vehiclesModel = db.collection("soldVehicles");
-    const checkvehicles_id = await vehiclesModel
-      .find({ vehicles_id: 1 })
-      .toArray();
+    const checkvehicles_id = await vehiclesModel.findOne({
+      vehicles_id: vehicles_id,
+    });
+
     if (!checkvehicles_id)
       return res
         .status(400)
@@ -45,12 +48,15 @@ const createUsers = async function (req, res) {
       country,
       user_info,
       password: hash,
-      vehicles_info: {vehicles_id:vehicles_id},
+      vehicles_info: { vehicles_id: vehicles_id },
     };
 
     const collection = db.collection("users");
 
-    const checkvehicles = await collection.find({ vehicles_id: 1 }).toArray();
+    const checkvehicles = await collection.findOne({
+      "vehicles_info.vehicles_id": data.vehicles_info.vehicles_id,
+    });
+  
     if (checkvehicles)
       return res
         .status(400)
@@ -97,7 +103,7 @@ const userLogin = async function (req, res) {
     return res.status(200).send({
       status: true,
       message: "User login successful",
-      data: { userId: verifyUser["_id"], token },
+      data: { _id: verifyUser["_id"], token },
     });
   } catch (err) {
     return res.status(500).send({ status: false, msg: err.message });

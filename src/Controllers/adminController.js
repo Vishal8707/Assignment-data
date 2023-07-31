@@ -54,7 +54,7 @@ const adminLogin = async function (req, res) {
     return res.status(200).send({
       status: true,
       message: "User login successful",
-      data: { userId: verifyUser["_id"], token },
+      data: { _id: verifyUser["_id"], token },
     });
   } catch (err) {
     return res.status(500).send({ status: false, msg: err.message });

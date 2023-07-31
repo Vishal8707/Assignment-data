@@ -1,7 +1,9 @@
 const { getDatabase } = require("../db");
 const { v4: uuidv4 } = require("uuid");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const faker = require("faker");
+const {validateEmail } = require("../validation/validator");
 
 const createDealership = async function (req, res) {
   try {
@@ -59,20 +61,21 @@ const createDealership = async function (req, res) {
 
 const dealershipLogin = async function (req, res) {
   try {
-    let email = req.body.email;
+    let dealership_email = req.body.dealership_email;
 
-    if (!email || email === "")
-      return res.status(400).send({ status: false, msg: "email is mandatory" });
+    if (!dealership_email || dealership_email === "")
+      return res.status(400).send({ status: false, msg: "dealership_email is mandatory" });
 
-    if (!validateEmail(email))
+    if (!validateEmail(dealership_email))
       return res
         .status(400)
-        .send({ status: false, message: "Please provide a valid email" });
+        .send({ status: false, message: "Please provide a valid dealership_email" });
 
     const db = getDatabase();
-    const collection = db.collection("users");
+    const collection = db.collection("dealership");
 
-    let verifyUser = await collection.findOne({ email: email });
+    let verifyUser = await collection.findOne({ dealership_email: dealership_email });
+   
 
     if (!verifyUser)
       return res
@@ -86,7 +89,7 @@ const dealershipLogin = async function (req, res) {
     return res.status(200).send({
       status: true,
       message: "User login successful",
-      data: { userId: verifyUser["_id"], token },
+      data: { _id: verifyUser["_id"], token },
     });
   } catch (err) {
     return res.status(500).send({ status: false, msg: err.message });

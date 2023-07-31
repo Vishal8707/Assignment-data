@@ -6,6 +6,8 @@ const {createDeal} = require("../Controllers/dealController")
 const {createDealership, dealershipLogin} = require("../Controllers/dealershipController")
 const{createAdmin, adminLogin} = require("../Controllers/adminController")
 
+const {isAuthenticated,authorization} = require("../middleware/Auth")
+
 const router = express.Router()
 
 router.get('/test-me', function (req, res) {
